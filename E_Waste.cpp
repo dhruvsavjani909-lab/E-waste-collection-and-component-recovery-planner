@@ -71,8 +71,8 @@ public:
         recoveryValuePerKg = 0;
     }
 
-    Component(int id, string name, double w, double c, int q,
-              bool h, double value)
+    Component(int id, string name, double w, double c,
+              int q, bool h, double value)
     {
         componentID = id;
         componentName = name;
@@ -149,7 +149,7 @@ public:
     double getCondition()
     {
         return condition;
-    }w
+    }
 
     int getQuantity()
     {
@@ -487,7 +487,7 @@ class WashingMachine : public EWaste
 {
 public:
     WashingMachine(int id, string name, string company,
-                    double weight, int quantity, double damage)
+                   double weight, int quantity, double damage)
         : EWaste(id, name, company, weight, quantity, damage)
     {
     }
@@ -527,9 +527,6 @@ public:
         if (damage < 70)
             return "Recoverable";
 
-        if (damage < 90)
-            return "Recyclable";
-
         return "Recyclable";
     }
 
@@ -539,88 +536,6 @@ public:
             return "Hazardous";
 
         return classify(damage);
-    }
-};
-
-class CollectionCenter
-{
-private:
-    int centerID;
-    string centerName;
-    string location;
-    double capacity;
-    double currentLoad;
-
-public:
-    CollectionCenter(int id, string name, string loc, double cap)
-    {
-        centerID = id;
-        centerName = name;
-        location = loc;
-        capacity = cap;
-        currentLoad = 0;
-    }
-
-    bool canAccept(double amount)
-    {
-        return currentLoad + amount <= capacity;
-    }
-
-    bool addWaste(double amount)
-    {
-        if (amount <= 0)
-            return false;
-
-        if (canAccept(amount))
-        {
-            currentLoad += amount;
-            return true;
-        }
-
-        return false;
-    }
-
-    int getID()
-    {
-        return centerID;
-    }
-
-    string getName()
-    {
-        return centerName;
-    }
-
-    string getLocation()
-    {
-        return location;
-    }
-
-    double getCapacity()
-    {
-        return capacity;
-    }
-
-    double getCurrentLoad()
-    {
-        return currentLoad;
-    }
-
-    double getAvailableCapacity()
-    {
-        return capacity - currentLoad;
-    }
-
-    void display()
-    {
-        cout << "\n========================================";
-        cout << "\nCenter ID          : " << centerID;
-        cout << "\nCenter Name        : " << centerName;
-        cout << "\nLocation           : " << location;
-        cout << "\nCapacity           : " << capacity << " kg";
-        cout << "\nCurrent Load       : " << currentLoad << " kg";
-        cout << "\nAvailable Capacity : "
-             << getAvailableCapacity() << " kg";
-        cout << "\n========================================\n";
     }
 };
 
@@ -674,6 +589,7 @@ public:
             Component* c = componentList[i];
 
             cout << "\n----------------------------------------";
+
             cout << "\nComponent       : "
                  << c->getComponentName();
 
@@ -767,27 +683,6 @@ public:
 
         file.close();
     }
-
-    void saveCollectionCenter(CollectionCenter* center)
-    {
-        ofstream file("collection_centers.csv", ios::app);
-
-        if (!file)
-        {
-            cout << "\nError opening collection_centers.csv";
-            return;
-        }
-
-        file << center->getID() << ","
-             << center->getName() << ","
-             << center->getLocation() << ","
-             << center->getCapacity() << ","
-             << center->getCurrentLoad() << ","
-             << center->getAvailableCapacity()
-             << "\n";
-
-        file.close();
-    }
 };
 
 class ReportGenerator
@@ -795,9 +690,7 @@ class ReportGenerator
 public:
     void generateReport(
         EWaste* products[],
-        int productCount,
-        CollectionCenter* centers[],
-        int centerCount)
+        int productCount)
     {
         ofstream file("ewaste_report.txt");
 
@@ -823,19 +716,14 @@ public:
             EWaste* product = products[i];
 
             string category =
-                classifier.classify(
-                    product->getDamage()
-                );
+                classifier.classify(product->getDamage());
 
             if (category == "Reusable")
                 reusable++;
-
             else if (category == "Repairable")
                 repairable++;
-
             else if (category == "Recoverable")
                 recoverable++;
-
             else
                 recyclable++;
 
@@ -898,38 +786,7 @@ public:
         file << "Hazardous Components    : "
              << hazardousCount << "\n\n";
 
-        file << "----------------------------------------\n";
-        file << "COLLECTION CENTERS\n";
-        file << "----------------------------------------\n";
-
-        for (int i = 0; i < centerCount; i++)
-        {
-            CollectionCenter* center =
-                centers[i];
-
-            file << "\nCenter ID       : "
-                 << center->getID();
-
-            file << "\nCenter Name     : "
-                 << center->getName();
-
-            file << "\nLocation        : "
-                 << center->getLocation();
-
-            file << "\nCapacity        : "
-                 << center->getCapacity()
-                 << " kg";
-
-            file << "\nCurrent Load    : "
-                 << center->getCurrentLoad()
-                 << " kg";
-
-            file << "\nAvailable       : "
-                 << center->getAvailableCapacity()
-                 << " kg\n";
-        }
-
-        file << "\n========================================\n";
+        file << "========================================\n";
 
         file.close();
 
@@ -968,60 +825,25 @@ Component* createComponent(int componentID)
     cin >> quantity;
 
     if (choice == 1)
-        return new RAM(
-            componentID,
-            weight,
-            condition,
-            quantity
-        );
+        return new RAM(componentID, weight, condition, quantity);
 
     if (choice == 2)
-        return new ROM(
-            componentID,
-            weight,
-            condition,
-            quantity
-        );
+        return new ROM(componentID, weight, condition, quantity);
 
     if (choice == 3)
-        return new Battery(
-            componentID,
-            weight,
-            condition,
-            quantity
-        );
+        return new Battery(componentID, weight, condition, quantity);
 
     if (choice == 4)
-        return new Charger(
-            componentID,
-            weight,
-            condition,
-            quantity
-        );
+        return new Charger(componentID, weight, condition, quantity);
 
     if (choice == 5)
-        return new Glass(
-            componentID,
-            weight,
-            condition,
-            quantity
-        );
+        return new Glass(componentID, weight, condition, quantity);
 
     if (choice == 6)
-        return new Copper(
-            componentID,
-            weight,
-            condition,
-            quantity
-        );
+        return new Copper(componentID, weight, condition, quantity);
 
     if (choice == 7)
-        return new Plastic(
-            componentID,
-            weight,
-            condition,
-            quantity
-        );
+        return new Plastic(componentID, weight, condition, quantity);
 
     string name;
     double value;
@@ -1036,8 +858,7 @@ Component* createComponent(int componentID)
     cout << "Enter recovery value per kg: ";
     cin >> value;
 
-    bool hazardous =
-        (h == 'Y' || h == 'y');
+    bool hazardous = (h == 'Y' || h == 'y');
 
     return new GenericComponent(
         componentID,
@@ -1098,78 +919,50 @@ EWaste* createProduct()
     if (type == 1)
     {
         product = new Laptop(
-            id,
-            name,
-            company,
-            weight,
-            quantity,
-            damage
+            id, name, company,
+            weight, quantity, damage
         );
     }
     else if (type == 2)
     {
         product = new Mobile(
-            id,
-            name,
-            company,
-            weight,
-            quantity,
-            damage
+            id, name, company,
+            weight, quantity, damage
         );
     }
     else if (type == 3)
     {
         product = new TV(
-            id,
-            name,
-            company,
-            weight,
-            quantity,
-            damage
+            id, name, company,
+            weight, quantity, damage
         );
     }
     else if (type == 4)
     {
         product = new AC(
-            id,
-            name,
-            company,
-            weight,
-            quantity,
-            damage
+            id, name, company,
+            weight, quantity, damage
         );
     }
     else if (type == 5)
     {
         product = new Refrigerator(
-            id,
-            name,
-            company,
-            weight,
-            quantity,
-            damage
+            id, name, company,
+            weight, quantity, damage
         );
     }
     else if (type == 6)
     {
         product = new WashingMachine(
-            id,
-            name,
-            company,
-            weight,
-            quantity,
-            damage
+            id, name, company,
+            weight, quantity, damage
         );
     }
     else
     {
         product = new GenericProduct(
-            id,
-            name,
-            company,
-            weight,
-            quantity,
-            damage
+            id, name, company,
+            weight, quantity, damage
         );
     }
 
@@ -1237,138 +1030,35 @@ void generateRecoveryPlan(
     cout << "\nProduct not found.";
 }
 
-void addCollectionCenter(
-    CollectionCenter* centers[],
-    int& centerCount,
-    CSVManager& csvManager)
+int main()
 {
-    if (centerCount >= 20)
-    {
-        cout << "\nMaximum collection centers reached.";
-        return;
-    }
-
-    int id;
+    int userID;
     string name;
+    string contact;
     string location;
-    double capacity;
 
-    cout << "\n========== ADD COLLECTION CENTER ==========";
+    cout << "\n========================================";
+    cout << "\n           USER INFORMATION";
+    cout << "\n========================================";
 
-    cout << "\nEnter Center ID: ";
-    cin >> id;
+    cout << "\nEnter User ID: ";
+    cin >> userID;
 
-    cout << "Enter Center Name: ";
+    cout << "Enter Name: ";
     cin >> name;
+
+    cout << "Enter Contact: ";
+    cin >> contact;
 
     cout << "Enter Location: ";
     cin >> location;
 
-    cout << "Enter Capacity (kg): ";
-    cin >> capacity;
+    User user(userID, name, contact, location);
 
-    CollectionCenter* center =
-        new CollectionCenter(
-            id,
-            name,
-            location,
-            capacity
-        );
+    cout << "\nUser registered successfully.";
 
-    centers[centerCount] = center;
-    centerCount++;
-
-    csvManager.saveCollectionCenter(center);
-
-    cout << "\nCollection center added successfully.";
-}
-
-void displayCollectionCenters(
-    CollectionCenter* centers[],
-    int centerCount)
-{
-    if (centerCount == 0)
-    {
-        cout << "\nNo collection centers available.";
-        return;
-    }
-
-    for (int i = 0; i < centerCount; i++)
-    {
-        centers[i]->display();
-    }
-}
-
-void assignWaste(
-    EWaste* products[],
-    int productCount,
-    CollectionCenter* centers[],
-    int centerCount)
-{
-    if (productCount == 0)
-    {
-        cout << "\nNo products available.";
-        return;
-    }
-
-    if (centerCount == 0)
-    {
-        cout << "\nNo collection centers available.";
-        return;
-    }
-
-    int productID;
-    double amount;
-
-    cout << "\nEnter Product ID: ";
-    cin >> productID;
-
-    cout << "Enter Waste Weight to Assign (kg): ";
-    cin >> amount;
-
-    bool productFound = false;
-
-    for (int i = 0; i < productCount; i++)
-    {
-        if (products[i]->getProductID() == productID)
-        {
-            productFound = true;
-
-            for (int j = 0; j < centerCount; j++)
-            {
-                if (centers[j]->addWaste(amount))
-                {
-                    cout << "\nWaste assigned successfully.";
-
-                    cout << "\nCollection Center: "
-                         << centers[j]->getName();
-
-                    cout << "\nLocation: "
-                         << centers[j]->getLocation();
-
-                    return;
-                }
-            }
-        }
-    }
-
-    if (!productFound)
-    {
-        cout << "\nProduct not found.";
-    }
-    else
-    {
-        cout << "\nNo collection center has enough capacity.";
-    }
-}
-
-int main()
-{
     EWaste* products[100];
     int productCount = 0;
-
-    CollectionCenter* centers[20];
-    int centerCount = 0;
 
     CSVManager csvManager;
     ReportGenerator reportGenerator;
@@ -1382,14 +1072,14 @@ int main()
         cout << "\n              PLANNER";
         cout << "\n========================================";
 
-        cout << "\n1. Add E-Waste Product";
+        cout << "\nUser: " << user.getName();
+        cout << "\nLocation: " << user.getLocation();
+
+        cout << "\n\n1. Add E-Waste Product";
         cout << "\n2. Display All Products";
         cout << "\n3. Generate Recovery Plan";
-        cout << "\n4. Add Collection Center";
-        cout << "\n5. Assign Waste to Collection Center";
-        cout << "\n6. Display Collection Centers";
-        cout << "\n7. Generate Final Report";
-        cout << "\n8. Exit";
+        cout << "\n4. Generate Final Report";
+        cout << "\n5. Exit";
 
         cout << "\n\nEnter your choice: ";
         cin >> choice;
@@ -1417,7 +1107,6 @@ int main()
                 cout << "\nData saved to CSV files.";
             }
         }
-
         else if (choice == 2)
         {
             displayAllProducts(
@@ -1425,7 +1114,6 @@ int main()
                 productCount
             );
         }
-
         else if (choice == 3)
         {
             generateRecoveryPlan(
@@ -1433,73 +1121,34 @@ int main()
                 productCount
             );
         }
-
         else if (choice == 4)
-        {
-            addCollectionCenter(
-                centers,
-                centerCount,
-                csvManager
-            );
-        }
-
-        else if (choice == 5)
-        {
-            assignWaste(
-                products,
-                productCount,
-                centers,
-                centerCount
-            );
-        }
-
-        else if (choice == 6)
-        {
-            displayCollectionCenters(
-                centers,
-                centerCount
-            );
-        }
-
-        else if (choice == 7)
         {
             reportGenerator.generateReport(
                 products,
-                productCount,
-                centers,
-                centerCount
+                productCount
             );
         }
-
-        else if (choice == 8)
+        else if (choice == 5)
         {
             cout << "\nGenerating final report...";
 
             reportGenerator.generateReport(
                 products,
-                productCount,
-                centers,
-                centerCount
+                productCount
             );
 
             cout << "\nProgram terminated.";
         }
-
         else
         {
             cout << "\nInvalid choice.";
         }
 
-    } while (choice != 8);
+    } while (choice != 5);
 
     for (int i = 0; i < productCount; i++)
     {
         delete products[i];
-    }
-
-    for (int i = 0; i < centerCount; i++)
-    {
-        delete centers[i];
     }
 
     return 0;
